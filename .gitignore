@@ -1,0 +1,16 @@
+
+.svn
+.idea/
+.env/
+*.egg-info
+reports/
+build/
+nohup.out
+.DS_Store
+xcuserdata/
+out/
+gen-external-apklibs/
+target/
+*.iml
+.
+local.properties
