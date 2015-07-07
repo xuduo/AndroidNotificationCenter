@@ -1,6 +1,6 @@
-EventBus
+AndroidNotificationCenter
 ========
-NotificationCenterAndroid is a ObserverPattern implementation for android, like NSNotificationCenter in ios.
+AndroidNotificationCenter is a ObserverPattern implementation for android, like NSNotificationCenter in ios.
 
  * uses java InvocationHandler 
     * static type interface ,prevent typo, if you change method name or argument type, observers won't compile without modification
