@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * IOS NSNotificationCenter for Android
@@ -22,7 +23,7 @@ public enum NotificationCenter {
     private Set<Object> observers;
 
     NotificationCenter() {
-        notificationMap = new HashMap<Class<?>, Notification>();
+        notificationMap = new ConcurrentHashMap<>();
         observers = new HashSet<Object>();
         Looper mainLooper = Looper.getMainLooper();
         handler = new Handler(mainLooper);
@@ -56,24 +57,7 @@ public enum NotificationCenter {
     }
 
     public void removeObserver(final Object observer) {
-        if (isMainThread()) {
-            doRemoveObserver(observer);
-        } else {
-            Log.w(TAG, String.format("trying to remove observer in non main thread: %s", observer.getClass()));
-            removeObserverLater(observer);
-        }
-    }
-
-    /**
-     * observer will be removed later
-     * @param observer
-     */
-    private void removeObserverLater(final Object observer) {
-        handler.post(new Runnable() {
-            public void run() {
-                doRemoveObserver(observer);
-            }
-        });
+        doRemoveObserver(observer);
     }
 
     private void doRemoveObserver(Object observer) {
