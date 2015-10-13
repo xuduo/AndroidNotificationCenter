@@ -5,9 +5,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -16,22 +14,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum NotificationCenter {
     INSTANCE;
 
-    private static final String TAG = "notification";
+    public static final String TAG = "notification";
     private Map<Class<?>, Notification> notificationMap;
     private long mainThreadId;
     private Handler handler;
-    private Set<Object> observers;
+    private Map<Object, Boolean> observers;
 
     NotificationCenter() {
-        notificationMap = new ConcurrentHashMap<>();
-        observers = new HashSet<Object>();
+        notificationMap = new HashMap<Class<?>, Notification>();
+        observers = new ConcurrentHashMap<Object, Boolean>();
         Looper mainLooper = Looper.getMainLooper();
         handler = new Handler(mainLooper);
         mainThreadId = mainLooper.getThread().getId();
     }
 
     /**
-     * add observer
+     * add observer by annotation
      *
      * @param observer
      */
@@ -39,7 +37,7 @@ public enum NotificationCenter {
         if (isMainThread()) {
             doAddObserver(observer);
         } else {
-            Log.w(TAG, String.format("trying to add observer in non main thread: %s", observer.getClass()));
+            Log.w(TAG, String.format("trying to add observer in non main thread: " + observer.getClass()));
             handler.post(new Runnable() {
                 public void run() {
                     doAddObserver(observer);
@@ -53,11 +51,29 @@ public enum NotificationCenter {
     }
 
     private void doAddObserver(Object observer) {
-        observers.add(observer);
+        observers.put(observer, true);
     }
 
     public void removeObserver(final Object observer) {
-        doRemoveObserver(observer);
+        if (isMainThread()) {
+            doRemoveObserver(observer);
+        } else {
+            Log.w(TAG, String.format("trying to remove observer in non main thread: " + observer.getClass()));
+            removeObserverLater(observer);
+        }
+    }
+
+    /**
+     * observer will be removed later
+     *
+     * @param observer
+     */
+    private void removeObserverLater(final Object observer) {
+        handler.post(new Runnable() {
+            public void run() {
+                doRemoveObserver(observer);
+            }
+        });
     }
 
     private void doRemoveObserver(Object observer) {
@@ -91,5 +107,13 @@ public enum NotificationCenter {
 
     public void removeAll() {
         observers.clear();
+    }
+
+    @Deprecated
+    /**
+     * @deprecated no need to add callback before invoking since release 1.0.31
+     */
+    public void addCallbacks(Class callbackParent) {
+        // do nothing
     }
 }
