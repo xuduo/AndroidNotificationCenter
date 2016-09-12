@@ -1,28 +1,24 @@
 package com.yy.androidlib.util.notification;
 
-import android.os.Handler;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.Map;
-
 import android.util.Log;
 
-public class Notification<T> implements InvocationHandler {
-    private final Map<Object, Boolean> observers;
-    private Handler mainHandler;
-    private T observerProxy = null;
-    private Class<T> callback;
+import java.lang.reflect.*;
 
-    public Notification(Class<T> callback, Handler handler, Map<Object, Boolean> observers) {
+/**
+ * Created by huangzhilong on 2016/9/12.
+ */
+public class Notification<T> implements InvocationHandler {
+    public T observerProxy;
+    public Class<T> callback;
+
+    public Notification(Class<T> callback) {
         this.callback = callback;
-        this.mainHandler = handler;
-        this.observers = observers;
     }
 
-    public Object invoke(Object proxy, final Method method, final Object[] args) {
-        mainHandler.post(new Runnable() {
+    @Override
+    public Object invoke(Object o, final Method method, final Object[] args) throws Throwable {
+        NotificationCenter.INSTANCE.handler.post(new Runnable() {
+            @Override
             public void run() {
                 doInvoke(method, args);
             }
@@ -31,7 +27,7 @@ public class Notification<T> implements InvocationHandler {
     }
 
     private void doInvoke(Method method, Object[] args) {
-        for (Object observer : observers.keySet()) {
+        for (Object observer : NotificationCenter.INSTANCE.observers.keySet()) {
             if (callback.isInstance(observer)) {
                 try {
                     method.invoke(observer, args);
@@ -44,8 +40,9 @@ public class Notification<T> implements InvocationHandler {
 
     public T getObserver() {
         if (observerProxy == null) {
-            observerProxy = (T) Proxy.newProxyInstance(callback.getClassLoader(), new Class<?>[]{callback}, this);
+            observerProxy = (T) java.lang.reflect.Proxy.newProxyInstance(callback.getClassLoader(), new Class<?>[]{callback}, this);
         }
         return observerProxy;
     }
+
 }

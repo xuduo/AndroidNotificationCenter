@@ -13,16 +13,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public enum NotificationCenter {
     INSTANCE;
-
     public static final String TAG = "notification";
-    private Map<Class<?>, Notification> notificationMap;
+    private Map<Class<?>, Proxy> proxyMap;
     private long mainThreadId;
-    private Handler handler;
-    private Map<Object, Boolean> observers;
+    Handler handler;
+    Map<Object, Boolean> observers;
 
     NotificationCenter() {
-        notificationMap = new HashMap<Class<?>, Notification>();
-        observers = new ConcurrentHashMap<Object, Boolean>();
+        proxyMap = new HashMap<>();
+        observers = new ConcurrentHashMap<>();
         Looper mainLooper = Looper.getMainLooper();
         handler = new Handler(mainLooper);
         mainThreadId = mainLooper.getThread().getId();
@@ -80,29 +79,49 @@ public enum NotificationCenter {
         observers.remove(observer);
     }
 
+    public void addStickyObserver(final Object observer) {
+        addObserver(observer);
+        handler.post(new Runnable() {
+            public void run() {
+                getStickyMessage(observer);
+            }
+        });
+    }
+
+    private void getStickyMessage(Object observer) {
+        for (Class callback : proxyMap.keySet()) {
+            Proxy proxy = getProxy(callback);
+            proxy.getStickyNotification().sendStickyMessage(observer);
+        }
+    }
+
     /**
      * @param callback
      * @return not null
      */
-    private <T> Notification<T> getNotification(Class<T> callback) {
-        Notification notification = notificationMap.get(callback);
-        if (notification == null) {
-            notification = addNotification(callback);
+    private <T> Proxy<T> getProxy(Class<T> callback) {
+        Proxy<T> proxy = proxyMap.get(callback);
+        if (proxy == null) {
+            proxy = addProxy(callback);
         }
-        return notification;
+        return proxy;
     }
 
-    private <T> Notification<T> addNotification(Class<T> callback) {
-        Notification<T> notification = notificationMap.get(callback);
-        if (notification == null) {
-            notification = new Notification<T>(callback, handler, observers);
-            notificationMap.put(callback, notification);
+    private <T> Proxy<T> addProxy(Class<T> callback) {
+        Proxy<T> proxy = proxyMap.get(callback);
+        if (proxy == null) {
+            proxy = new Proxy<T>(callback);
+            proxyMap.put(callback, proxy);
         }
-        return notification;
+        return proxy;
     }
 
     public <T> T getObserver(Class<T> callback) {
-        return getNotification(callback).getObserver();
+        return getProxy(callback).getNotification().getObserver();
+    }
+
+    public <T> T getStickyObserver(Class<T> callback) {
+        return getProxy(callback).getStickyNotification().getObserver();
     }
 
     public void removeAll() {
