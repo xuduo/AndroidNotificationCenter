@@ -1,88 +1,24 @@
-apply plugin: 'java'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-configurations {
-    provided
-}
-
-sourceSets {
-    main.compileClasspath += configurations.provided
-    test.compileClasspath += configurations.provided
-    test.runtimeClasspath += configurations.provided
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    provided 'com.google.android:android:4.1.1.4'
-}
-
-//------
-
-apply plugin: 'maven'
-apply plugin: 'signing'
-
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
-}
-
-group = 'com.yy'
-version = '1.0.3'
-archivesBaseName = 'notification-center-android'
-
-uploadArchives {
+buildscript {
     repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
-            }
-
-            pom.project {
-                name 'notification-center-android'
-                packaging 'jar'
-                description 'stomp-android'
-                url 'https://github.com/xuduo/stomp-app'
-
-                scm {
-                    url 'https://github.com/xuduo/AndroidNotificationCenter'
-                    connection 'https://github.com/xuduo/AndroidNotificationCenter'
-                    developerConnection 'https://github.com/xuduo/AndroidNotificationCenter'
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'xuduo'
-                        name 'xuduo'
-                    }
-                }
-            }
-
-        }
+        jcenter()
     }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.2'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = 1.7
+        targetCompatibility = 1.7
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
