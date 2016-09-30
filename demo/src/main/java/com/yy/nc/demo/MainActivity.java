@@ -58,7 +58,8 @@ public class MainActivity extends Activity implements MyCallBack.SpeedTest {
                 String post = editPost.getText().toString();
                 postCount = Integer.parseInt(post);
                 if (testCount <= 0 || testRate <= 0 || postCount <= 0) {
-                    Toast.makeText(MainActivity.this, "输入错误!", Toast.LENGTH_SHORT);
+                    Toast.makeText(MainActivity.this, "输入错误!", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 state = TESTING_STATE;
