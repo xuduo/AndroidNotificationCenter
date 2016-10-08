@@ -20,7 +20,7 @@ public enum NotificationCenter {
     private Handler handler;
 
     NotificationCenter() {
-        notificationMap = new HashMap<>();
+        notificationMap = new ConcurrentHashMap<>();
         Looper mainLooper = Looper.getMainLooper();
         handler = new Handler(mainLooper);
         mainThreadId = mainLooper.getThread().getId();
