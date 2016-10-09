@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,12 +19,14 @@ public enum NotificationCenter {
     private Map<Class<?>, Notification> notificationMap;
     private long mainThreadId;
     private Handler handler;
+    private Map<Object, Boolean> allObserver;
 
     NotificationCenter() {
         notificationMap = new ConcurrentHashMap<>();
         Looper mainLooper = Looper.getMainLooper();
         handler = new Handler(mainLooper);
         mainThreadId = mainLooper.getThread().getId();
+        allObserver = new HashMap<>();
     }
 
     /**
@@ -49,17 +52,15 @@ public enum NotificationCenter {
     }
 
     private void doAddObserver(Object observer) {
-        Class<?> inters[] = getInterfaces(observer);
-        for (int i = 0; i < inters.length; i++) {
-            Notification notification = getNotification(inters[i]);
-            notification.getObservers().put(observer, true);
-        }
-    }
+        allObserver.put(observer, true);
 
-    private Class<?> [] getInterfaces(Object observer) {
-        Class<?> clazz = observer.getClass();
-        Class<?> inters[] = clazz.getInterfaces();
-        return inters;
+        for (Iterator<Class<?>> it = notificationMap.keySet().iterator(); it.hasNext(); ) {
+            Class<?> callback = it.next();
+            Notification notification = notificationMap.get(callback);
+            if (callback.isInstance(observer)) {
+                notification.getObservers().put(observer, true);
+            }
+        }
     }
 
     public void removeObserver(final Object observer) {
@@ -85,10 +86,14 @@ public enum NotificationCenter {
     }
 
     private void doRemoveObserver(Object observer) {
-        Class<?> inters[] = getInterfaces(observer);
-        for (int i = 0; i < inters.length; i++) {
-            Notification notification = getNotification(inters[i]);
-            notification.getObservers().remove(observer);
+        allObserver.remove(observer);
+
+        for (Iterator<Class<?>> it = notificationMap.keySet().iterator(); it.hasNext(); ) {
+            Class<?> callback = it.next();
+            Notification notification = notificationMap.get(callback);
+            if (callback.isInstance(observer)) {
+                notification.getObservers().remove(observer);
+            }
         }
     }
 
@@ -109,6 +114,13 @@ public enum NotificationCenter {
         if (notification == null) {
             notification = new Notification<T>(callback, handler);
             notificationMap.put(callback, notification);
+        }
+
+        //addobserver
+        for (Object observer : allObserver.keySet()) {
+            if (callback.isInstance(observer)) {
+                notification.getObservers().put(observer, true);
+            }
         }
         return notification;
     }
