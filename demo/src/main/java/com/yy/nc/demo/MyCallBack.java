@@ -13,6 +13,6 @@ public interface MyCallBack {
     }
 
     interface SpeedTest {
-        void costTime(String type, long time);
+        void done(String type, long time);
     }
 }

@@ -2,7 +2,9 @@ package com.yy.nc.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,16 +20,14 @@ import java.util.List;
 public class MainActivity extends Activity implements MyCallBack.SpeedTest {
 
     public static int testCount, testRate;
-    public static long times, indexs, availabCount;
+    public static long indexs, availabCount;
 
     private EditText editCount, editRate, editPost;
     private TextView tv_add, tv_post, tv_remove, tv_state;
-    private final static int INIT_STATE = 0;
-    private final static int TESTING_STATE = 1;
-    private int state = INIT_STATE;
     private List<Object> observes;
-    private int postCount;
+    public static int postCount;
     private long postNotificationTime, postEventBusTime;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -38,7 +38,7 @@ public class MainActivity extends Activity implements MyCallBack.SpeedTest {
         editRate = (EditText) findViewById(R.id.et_rate);
         editRate.setText("10");
         editPost = (EditText) findViewById(R.id.et_post);
-        editPost.setText("100");
+        editPost.setText("1000");
 
         tv_add = (TextView) findViewById(R.id.tv_add);
         tv_post = (TextView) findViewById(R.id.tv_post);
@@ -48,9 +48,7 @@ public class MainActivity extends Activity implements MyCallBack.SpeedTest {
         findViewById(R.id.btn_test).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (state != INIT_STATE) {
-                    return;
-                }
+                findViewById(R.id.btn_test).setEnabled(false);
                 String count = editCount.getText().toString();
                 testCount = Integer.parseInt(count);
                 String rate = editRate.getText().toString();
@@ -62,7 +60,6 @@ public class MainActivity extends Activity implements MyCallBack.SpeedTest {
                     return;
                 }
 
-                state = TESTING_STATE;
                 if (observes == null || observes.size() == 0) {
                     observes = new ArrayList<>(testCount);
                     availabCount = 0;
@@ -78,12 +75,12 @@ public class MainActivity extends Activity implements MyCallBack.SpeedTest {
                 }
 
                 ((TextView) findViewById(R.id.tv_number)).setText("availabCount: " + availabCount + "  " + " postCount:" + postCount);
-                tv_state.setText("notification addObservering");
+                tv_state.setText("NC add Observer");
                 long startTime = System.currentTimeMillis();
                 for (int i = 0; i < observes.size(); i++) {
                     NotificationCenter.INSTANCE.addObserver(observes.get(i));
                 }
-                tv_add.setText("addObserver: notification  " + (System.currentTimeMillis() - startTime));
+                tv_add.setText("addObserver: NC  " + (System.currentTimeMillis() - startTime));
 
                 tv_state.setText("EventBus addObservering");
                 startTime = System.currentTimeMillis();
@@ -92,47 +89,55 @@ public class MainActivity extends Activity implements MyCallBack.SpeedTest {
                 }
                 tv_add.setText(tv_add.getText().toString() + "   EventBus " + (System.currentTimeMillis() - startTime));
 
-                times = 0;
                 postEventBusTime = 0;
                 postNotificationTime = 0;
                 tv_state.setText("notification postMsging");
-                testNotificationPost();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        testNotificationPost();
+                    }
+                });
             }
         });
     }
 
     private void testNotificationPost() {
-        times++;//对应postCount，表示postmsg的次数
-        indexs = 0;
-        NotificationCenter.INSTANCE.getObserver(MyCallBack.Test.class).success(new Message(System.currentTimeMillis()));
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                postNotificationTime = System.currentTimeMillis();
+                for (int i = 0; i < postCount; i++) {
+                    NotificationCenter.INSTANCE.getObserver(MyCallBack.Test.class).success(new Message(System.currentTimeMillis()));
+                }
+            }
+        });
     }
 
     private void testEventBus() {
-        times++;
-        indexs = 0;
-        EventBus.getDefault().post(new Message(System.currentTimeMillis()));
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                postEventBusTime = System.currentTimeMillis();
+                for (int i = 0; i < postCount; i++) {
+                    EventBus.getDefault().post(new Message(System.currentTimeMillis()));
+                }
+            }
+        });
     }
 
     @Override
-    public void costTime(String type, long time) {
+    public void done(String type, long time) {
+        indexs = 0;
         if (type.equals("notification")) {
-            postNotificationTime = postNotificationTime + time;
-            if (times < postCount) {
-                testNotificationPost();
-            } else {
-                System.out.println("start post eventBus");
-                tv_state.setText("EventBus postMsging");
-                times = 0;
-                testEventBus();
-            }
+            postNotificationTime = System.currentTimeMillis() - postNotificationTime;
+            tv_state.setText("EventBus postMsging");
+            testEventBus();
+            tv_post.setText("postMsg: NC  " + postNotificationTime + "  eventBus  " + postEventBusTime);
         } else {
-            postEventBusTime = postEventBusTime + time;
-            if (times < postCount) {
-                testEventBus();
-            } else {
-                tv_post.setText("postMsg: notification  " + postNotificationTime + "  eventBus  " + postEventBusTime);
-                removeObserver();
-            }
+            postEventBusTime = System.currentTimeMillis() - postEventBusTime;
+            tv_post.setText("postMsg: NC  " + postNotificationTime + "  eventBus  " + postEventBusTime);
+            removeObserver();
         }
     }
 
@@ -151,7 +156,7 @@ public class MainActivity extends Activity implements MyCallBack.SpeedTest {
         }
         tv_remove.setText(tv_remove.getText().toString() + "  EventBus  " + (System.currentTimeMillis() - startTime));
         observes.clear();
-        state = INIT_STATE;
         tv_state.setText("Test end");
+        ((Button) findViewById(R.id.btn_test)).setEnabled(true);
     }
 }
