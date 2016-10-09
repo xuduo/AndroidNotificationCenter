@@ -4,15 +4,7 @@ package com.yy.nc.demo;
  * Created by huangzhilong on 2016/9/20.
  */
 public interface MyCallBack {
-    interface Test {
-        void success(Message message);
-    }
 
-    interface Confusion {
-        void failed(Message message);
-    }
+    void success(Message message);
 
-    interface SpeedTest {
-        void done(String type, long time);
-    }
 }

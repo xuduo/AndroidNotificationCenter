@@ -23,11 +23,7 @@ public class Notification<T> implements InvocationHandler {
     }
 
     public Object invoke(Object proxy, final Method method, final Object[] args) {
-        mainHandler.post(new Runnable() {
-            public void run() {
-                doInvoke(method, args);
-            }
-        });
+        doInvoke(method, args);
         return null;
     }
 
