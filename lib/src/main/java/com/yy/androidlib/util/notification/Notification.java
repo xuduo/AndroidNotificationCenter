@@ -1,14 +1,13 @@
 package com.yy.androidlib.util.notification;
 
 import android.os.Handler;
+import android.util.Log;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashMap;
 import java.util.Map;
-
-import android.util.Log;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Notification<T> implements InvocationHandler {
     private Map<Object, Boolean> observers;
@@ -19,7 +18,7 @@ public class Notification<T> implements InvocationHandler {
     public Notification(Class<T> callback, Handler handler) {
         this.callback = callback;
         this.mainHandler = handler;
-        this.observers = new HashMap<>();
+        this.observers = new ConcurrentHashMap<>();
     }
 
     public Object invoke(Object proxy, final Method method, final Object[] args) {
