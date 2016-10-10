@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum NotificationCenter {
     INSTANCE;
 
-    public static final String TAG = "notification";
+    public static final String TAG = "NotificationCenter";
     private Map<Class<?>, Notification> notificationMap;
     private long mainThreadId;
     private Handler handler;
