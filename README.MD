@@ -1,6 +1,5 @@
 AndroidNotificationCenter
 ========
-AndroidNotificationCenter is a ObserverPattern implementation for android, like NSNotificationCenter in ios.
 Same as EventBus , Except for
 
  * Pros
