@@ -171,7 +171,7 @@ public class MainActivity extends Activity {
                 for (Object o : dummyObservers) {
                     NotificationCenter.INSTANCE.removeObserver(o);
                 }
-                tv_remove.setText("removeObserver: notification  " + (System.currentTimeMillis() - startTime));
+                tv_remove.setText("removeObserver: NC  " + (System.currentTimeMillis() - startTime));
 
                 tv_state.setText("EventBus removeObservering");
                 startTime = System.currentTimeMillis();
