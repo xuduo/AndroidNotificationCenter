@@ -70,7 +70,7 @@ maven
 ```xml
 <dependency>
     <groupId>com.yy</groupId>
-    <artifactId>android-push-sdk</artifactId>
+    <artifactId>notification-center-android</artifactId>
     <version>${version}</version>
 </dependency>
 ```
