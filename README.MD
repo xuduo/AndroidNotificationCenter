@@ -1,81 +1,82 @@
 AndroidNotificationCenter
 ========
 AndroidNotificationCenter is a ObserverPattern implementation for android, like NSNotificationCenter in ios.
+Same as EventBus , Except for
 
- * uses java InvocationHandler 
-    * static type interface ,prevent typo, if you change method name or argument type, observers won't compile without modification
-    * no reflection used
+ * Pros
+    * Only 200 lines of code.
+    * register/unregister call 50-100 times faster than EventBus! because we are not using reflection.
+    * No Annotation! Event is Interface based, using java.lang.reflect.Proxy, so compile time check for typo.
+    * slightly faster postEvent call, about 1.2-1.5 times faster than EventBus.
+    
+ * Cons
+    * no sticky feature
+    * event can only be received in main thread
 
+## NotificationCenter in 3 steps
 
-##maven dependency
-
-```
-        <dependency>
-            <groupId>com.yy</groupId>
-            <artifactId>notification-center-android</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-```
-
-##gradle dependency
+1.Define events as java Interface, sub
 
 ```
-        compile 'com.yy:notification-center-android:1.0.1'
-```
+public interface SomeEvent {
 
-### Usage
+    void someMethodName(Message param1);
 
-define interface (delegate in ios)
-```
-//callback interface
-interface LoginCallback {
-    void onLogin(String userName);
-    void onLogout();
 }
-
 ```
 
-implement callback interface
-add observer
+Sub interface is also Ok, for organising events
 ```
-public class NotificationActivity extends Activity implements LoginCallback {
+public interface SomeEventCategory {
 
- 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_notification);
-        NotificationCenter.INSTANCE.addObserver(this); //add this activity to NotificationCenter
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_notification);
-        NotificationCenter.INSTANCE.addObserver(this); //add this activity to NotificationCenter
+    interface Event1{
+        void method1();
+        void method2();
     }
     
-    @Override
-    protected void onDestroy() {
-        NotificationCenter.INSTANCE.addObserver(this); //remove this activity to NotificationCenter
-        super.onDestroy();
-    }
-        
-    @Override
-    public void onLogin(String userName) {
-        Toast.makeText(this, String.format("onLogin, userName: %s", userName), Toast.LENGTH_SHORT).show();
+    interface Event2{
+        void method1();
+        void method2();
     }
 
-    @Override
-    public void onLogout() {
-        Toast.makeText(this, "onLogout", Toast.LENGTH_SHORT).show();
-    }
 }
- 
 ```
 
-post Notification
+2.Prepare observers: Register your observer (in your onCreate or in a constructor):
+
 ```
- NotificationCenter.INSTANCE.getObserver(LoginCallback.class).onLogin("abc");
+NotificationCenter.INSTANCE.addObserver(this);
 ```
 
+Implement your Event Interface
+```
+class SomeActivity implements SomeEvent {
+
+    void someMethodName(Message param1);
+    
+}
+```
+
+3.Post events:
+```
+NotificationCenter.INSTANCE.getObserver(SomeEvent.class).someMethodName(new Message());
+```
+
+## Add NotificationCenter to your project
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.yy/notification-center-android/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.yy/notification-center-android)
+
+maven
+```xml
+<dependency>
+    <groupId>com.yy</groupId>
+    <artifactId>android-push-sdk</artifactId>
+    <version>${version}</version>
+</dependency>
+```
+
+
+gradle
+```groovy
+compile 'com.yy:android-push-sdk:${versoion}'
+```

@@ -127,7 +127,7 @@ public class MainActivity extends Activity {
             public void run() {
                 postNotificationTime = System.currentTimeMillis();
                 for (int i = 0; i < postCount; i++) {
-                    NotificationCenter.INSTANCE.getObserver(MyCallBack.class).success(new Message(System.currentTimeMillis()));
+                    NotificationCenter.INSTANCE.getObserver(SomeEvent.class).someMethodName(new Message(System.currentTimeMillis()));
                 }
             }
         });
