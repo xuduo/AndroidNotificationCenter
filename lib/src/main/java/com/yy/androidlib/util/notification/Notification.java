@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Notification<T> implements InvocationHandler {
+
     private Map<Object, Boolean> observers;
     private Handler mainHandler;
     private T observerProxy = null;

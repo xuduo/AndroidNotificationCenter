@@ -16,15 +16,12 @@ public enum NotificationCenter {
 
     public static final String TAG = "NotificationCenter";
     private Map<Class<?>, Notification> notificationMap;
-    private long mainThreadId;
     private Handler handler;
     private Map<Object, Boolean> allObserver;
 
     NotificationCenter() {
         notificationMap = new ConcurrentHashMap<>();
-        Looper mainLooper = Looper.getMainLooper();
-        handler = new Handler(mainLooper);
-        mainThreadId = mainLooper.getThread().getId();
+        handler = new Handler(Looper.getMainLooper());
         allObserver = new ConcurrentHashMap<>();
     }
 
@@ -34,23 +31,6 @@ public enum NotificationCenter {
      * @param observer
      */
     public void addObserver(final Object observer) {
-        if (isMainThread()) {
-            doAddObserver(observer);
-        } else {
-            Log.w(TAG, String.format("trying to add observer in non main thread: " + observer.getClass()));
-            handler.post(new Runnable() {
-                public void run() {
-                    doAddObserver(observer);
-                }
-            });
-        }
-    }
-
-    private boolean isMainThread() {
-        return Thread.currentThread().getId() == mainThreadId;
-    }
-
-    private void doAddObserver(Object observer) {
         allObserver.put(observer, true);
 
         for (Iterator<Class<?>> it = notificationMap.keySet().iterator(); it.hasNext(); ) {
@@ -63,28 +43,6 @@ public enum NotificationCenter {
     }
 
     public void removeObserver(final Object observer) {
-        if (isMainThread()) {
-            doRemoveObserver(observer);
-        } else {
-            Log.w(TAG, String.format("trying to remove observer in non main thread: " + observer.getClass()));
-            removeObserverLater(observer);
-        }
-    }
-
-    /**
-     * observer will be removed later
-     *
-     * @param observer
-     */
-    private void removeObserverLater(final Object observer) {
-        handler.post(new Runnable() {
-            public void run() {
-                doRemoveObserver(observer);
-            }
-        });
-    }
-
-    private void doRemoveObserver(Object observer) {
         allObserver.remove(observer);
 
         for (Iterator<Class<?>> it = notificationMap.keySet().iterator(); it.hasNext(); ) {
@@ -111,7 +69,7 @@ public enum NotificationCenter {
     private <T> Notification<T> addNotification(Class<T> callback) {
         Notification<T> notification = notificationMap.get(callback);
         if (notification == null) {
-            notification = new Notification<T>(callback, handler);
+            notification = new Notification<>(callback, handler);
             notificationMap.put(callback, notification);
         }
 
@@ -128,14 +86,7 @@ public enum NotificationCenter {
         return getNotification(callback).getObserver();
     }
 
-    public void removeAll() {
-        notificationMap.clear();
-    }
-
     @Deprecated
-    /**
-     * @deprecated no need to add callback before invoking since release 1.0.31
-     */
     public void addCallbacks(Class callbackParent) {
         // do nothing
     }
