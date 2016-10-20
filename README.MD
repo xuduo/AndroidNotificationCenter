@@ -3,10 +3,10 @@ AndroidNotificationCenter
 Same as EventBus , Except for
 
  * Pros
-    * Only 200 lines of code.
-    * register/unregister call 50-100 times faster than EventBus! because we are not using reflection.
+    * Only 150 lines of code.
+    * register/unregister call 100 times faster than EventBus!(when adding 5000 or more observers)
+    * post call, about 10 times faster than EventBus.
     * No Annotation! Event is Interface based, using java.lang.reflect.Proxy, so compile time check for typo.
-    * slightly faster postEvent call, about 1.2-1.5 times faster than EventBus.
     
  * Cons
     * no sticky feature
