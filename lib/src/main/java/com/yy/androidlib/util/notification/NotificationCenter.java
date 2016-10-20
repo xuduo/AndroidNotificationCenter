@@ -44,13 +44,8 @@ public enum NotificationCenter {
 
     public void removeObserver(final Object observer) {
         allObserver.remove(observer);
-
-        for (Iterator<Class<?>> it = notificationMap.keySet().iterator(); it.hasNext(); ) {
-            Class<?> callback = it.next();
-            Notification notification = notificationMap.get(callback);
-            if (callback.isInstance(observer)) {
-                notification.getObservers().remove(observer);
-            }
+        for (Iterator<Notification> it = notificationMap.values().iterator(); it.hasNext(); ) {
+            it.next().getObservers().remove(observer);
         }
     }
 

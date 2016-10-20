@@ -34,7 +34,7 @@ signing {
 }
 
 group = 'com.yy'
-version = '1.1.0'
+version = '1.1.1'
 archivesBaseName = 'notification-center-android'
 
 uploadArchives {

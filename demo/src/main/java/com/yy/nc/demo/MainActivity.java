@@ -41,9 +41,9 @@ public class MainActivity extends Activity {
         editCount = (EditText) findViewById(R.id.et_count);
         editCount.setText("5000");
         editRate = (EditText) findViewById(R.id.et_rate);
-        editRate.setText("10");
+        editRate.setText("20");
         editPost = (EditText) findViewById(R.id.et_post);
-        editPost.setText("2000");
+        editPost.setText("4000");
 
         tv_add = (TextView) findViewById(R.id.tv_add);
         tv_post = (TextView) findViewById(R.id.tv_post);
