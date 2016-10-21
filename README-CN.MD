@@ -21,8 +21,7 @@ post时候，传Interface进去，获取到该接口一个代理类
     SomeEvent proxy = NotificationCenter.INSTANCE.getObserver(SomeEvent.class);
     proxy.someMethodName("a",1,new Message());
 ```
-返回一个实现了T接口的Proxy实例, 可以直接调用接口定义的方法.
-
+返回一个实现了SomeEvent接口的Proxy实例, 可以直接调用接口定义的方法.
 
 好处？
 - Android Studio里，可以使用Find Usages，Go To -> implementation(s)。
@@ -32,7 +31,9 @@ post时候，传Interface进去，获取到该接口一个代理类
 - 方法可以定义多参数， 如 onFail(int code, String message)。
 
 ####性能对比
-测试手机，三星edge7
+测试手机:三星edge7 
+
+EventBus版本: greenrobot最新 3.0.0
 
 register 5000个对象， 其中20%的对象会收到post消息，起1个线程，循环post 100次，测试register，post，unregister的速度，单位毫秒
 
@@ -43,7 +44,10 @@ register 5000个对象， 其中20%的对象会收到post消息，起1个线程�
 | post |   246 |    3356 |
 
 register/unregister性能**100**倍以上
+
 post **10**倍以上
+
+测试代码见项目demo
 
 ####为什么EventBus这么慢？
 
