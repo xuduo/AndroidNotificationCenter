@@ -2,6 +2,9 @@
 
 大概4年前刚开始做Android的时候，我写的一个类似于EventBus的实现，目前应用于部门内大多数Android App。源码地址，文档 https://github.com/xuduo/AndroidNotificationCenter
 
+- 无Annotation, 基于Java Proxy实现
+- 某些场景下, 性能是EventBus的100倍以上
+
 #### Java Proxy vs Annotation
 NotificationCenter使用的核心技术是Java Proxy。 Android开发比较少会用到，在Java服务器开发中，经常会用到。
 
@@ -13,12 +16,12 @@ class SomeActivity implements SomeEvent {
 }
 ```
 
-Post时候，传Interface进去，获取到该接口一个代理类
+post时候，传Interface进去，获取到该接口一个代理类
 ```java
     SomeEvent proxy = NotificationCenter.INSTANCE.getObserver(SomeEvent.class);
     proxy.someMethodName("a",1,new Message());
 ```
-返回一个Proxy实例，实现了T接口。所以实现了T接口的Observer，都可以通过获取一个Proxy来调用。
+返回一个实现了T接口的Proxy实例, 可以直接调用接口定义的方法.
 
 
 好处？
@@ -30,9 +33,8 @@ Post时候，传Interface进去，获取到该接口一个代理类
 
 ####性能对比
 测试手机，三星edge7
-由于EventBus 3.0对查询某个类的@Subscription注解做了缓存优化，故测试了下不用cache的速度
 
-register 5000个对象， 其中20%个的对象会收到post消息，起1个线程，循环post 100次，测试register，post，unregister的速度，单位毫秒
+register 5000个对象， 其中20%的对象会收到post消息，起1个线程，循环post 100次，测试register，post，unregister的速度，单位毫秒
 
 |          |   NotificationCenter  |   EventBus   |
 |:--------:|:----------:|:-----------------------:|
