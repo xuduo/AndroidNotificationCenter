@@ -32,11 +32,9 @@ public enum NotificationCenter {
      */
     public void addObserver(final Object observer) {
         allObserver.put(observer, true);
-
-        for (Iterator<Class<?>> it = notificationMap.keySet().iterator(); it.hasNext(); ) {
-            Class<?> callback = it.next();
-            Notification notification = notificationMap.get(callback);
-            if (callback.isInstance(observer)) {
+        for(Class<?> i : observer.getClass().getInterfaces()) {
+            Notification notification = notificationMap.get(i);
+            if (notification != null) {
                 notification.getObservers().put(observer, true);
             }
         }
@@ -44,8 +42,11 @@ public enum NotificationCenter {
 
     public void removeObserver(final Object observer) {
         allObserver.remove(observer);
-        for (Iterator<Notification> it = notificationMap.values().iterator(); it.hasNext(); ) {
-            it.next().getObservers().remove(observer);
+        for(Class<?> i : observer.getClass().getInterfaces()) {
+            Notification notification = notificationMap.get(i);
+            if (notification != null) {
+                notification.getObservers().remove(observer);
+            }
         }
     }
 

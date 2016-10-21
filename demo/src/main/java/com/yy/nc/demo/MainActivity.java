@@ -13,9 +13,12 @@ import com.yy.androidlib.util.notification.NotificationCenter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class MainActivity extends Activity {
@@ -24,7 +27,7 @@ public class MainActivity extends Activity {
     public static int indexs, hitCount;
     public static MainActivity instance;
 
-    private EditText editCount, editRate, editPost;
+    private EditText editCount, editRate, editPost, editThreads;
     private TextView tv_add, tv_post, tv_remove, tv_state;
     private List<Object> notificationCenterObserves;
     private List<Object> eventBusObservers;
@@ -32,6 +35,7 @@ public class MainActivity extends Activity {
     public static int postCount;
     private long postNotificationTime, postEventBusTime;
     private Handler handler = new Handler();
+    private Executor executor = Executors.newFixedThreadPool(5);
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -43,7 +47,9 @@ public class MainActivity extends Activity {
         editRate = (EditText) findViewById(R.id.et_rate);
         editRate.setText("20");
         editPost = (EditText) findViewById(R.id.et_post);
-        editPost.setText("4000");
+        editPost.setText("100");
+        editThreads = (EditText) findViewById(R.id.et_threads);
+        editThreads.setText("1");
 
         tv_add = (TextView) findViewById(R.id.tv_add);
         tv_post = (TextView) findViewById(R.id.tv_post);
@@ -60,6 +66,8 @@ public class MainActivity extends Activity {
                 testRate = Integer.parseInt(rate);
                 String post = editPost.getText().toString();
                 postCount = Integer.parseInt(post);
+                String threads = editPost.getText().toString();
+                executor = Executors.newFixedThreadPool(Integer.parseInt(threads));
                 if (testCount <= 0 || testRate <= 0 || postCount <= 0) {
                     Toast.makeText(MainActivity.this, "输入错误!", Toast.LENGTH_SHORT).show();
                     return;
@@ -127,7 +135,12 @@ public class MainActivity extends Activity {
             public void run() {
                 postNotificationTime = System.currentTimeMillis();
                 for (int i = 0; i < postCount; i++) {
-                    NotificationCenter.INSTANCE.getObserver(SomeEvent.class).someMethodName(new Message(System.currentTimeMillis()));
+                    executor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            NotificationCenter.INSTANCE.getObserver(SomeEvent.class).someMethodName(new Message(System.currentTimeMillis()));
+                        }
+                    });
                 }
             }
         });
@@ -139,7 +152,12 @@ public class MainActivity extends Activity {
             public void run() {
                 postEventBusTime = System.currentTimeMillis();
                 for (int i = 0; i < postCount; i++) {
-                    EventBus.getDefault().post(new Message(System.currentTimeMillis()));
+                    executor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            EventBus.getDefault().post(new Message(System.currentTimeMillis()));
+                        }
+                    });
                 }
             }
         });
@@ -190,7 +208,7 @@ public class MainActivity extends Activity {
 
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void dummyMethod(String www) {
 
     }
