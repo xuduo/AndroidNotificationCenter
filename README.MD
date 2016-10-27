@@ -1,5 +1,7 @@
 AndroidNotificationCenter
 ========
+[中文介绍](README-CN.MD)
+
 Same as EventBus , Except for
 
  * Pros
