@@ -1,12 +1,17 @@
 ## Android NotificationCenter
 
-大概4年前刚开始做Android的时候，我写的一个类似于EventBus的实现，目前应用于部门内大多数Android App。源码地址，文档 https://github.com/xuduo/AndroidNotificationCenter
+大概4年前，我写的一个类似于EventBus的实现，经过了很多个版本的调整，目前应用于部门内大多数Android App。源码地址，文档 https://github.com/xuduo/AndroidNotificationCenter
 
 - 无Annotation, 基于Java Proxy实现
 - 某些场景下, 性能是EventBus的100倍以上
 
 #### Java Proxy vs Annotation
 NotificationCenter使用的核心技术是Java Proxy。 Android开发比较少会用到，在Java服务器开发中，经常会用到。
+
+
+有感于如gson，jackson库提供的泛型接口，用起来非常爽，开始研究在观察者模式中，如何通过一个接口来获取observer。由于observer是一个list，如果通过泛型直接获取，需要循环调用。后来就发现了Java Proxy这个东西，可以用Proxy来装这一个observer list，在Proxy里循环调用observer即可。
+
+用法：
 
 首先定义一个接口，如SomeEvent，并实现接口
 ```java
@@ -29,6 +34,11 @@ post时候，传Interface进去，获取到该接口一个代理类
 - 不会因为忘了加Annotation调不到。
 - 方法参数可以是任何类型，如 int, String，EventBus必须是一个自定义的对象。
 - 方法可以定义多参数， 如 onFail(int code, String message)。
+
+感觉EventBus的几个坑
+- 容易忘了加Annotation
+- 由于不是默认，容易忘了指定主线程回调
+- 如果使用不当，可能写出很长的switch代码
 
 ####性能对比
 测试手机:三星edge7 
