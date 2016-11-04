@@ -1,6 +1,6 @@
 ## Android NotificationCenter
 
-大概4年前，我写的一个类似于EventBus的实现，经过了很多个版本的调整，目前应用于部门内大多数Android App。源码地址，文档 https://github.com/xuduo/AndroidNotificationCenter
+一个类EventBus的实现，经过了很多个版本的调整，目前应用于部门内大多数Android App。源码地址，文档 https://github.com/xuduo/AndroidNotificationCenter
 
 - 无Annotation, 基于Java Proxy实现
 - 某些场景下, 性能是EventBus的100倍以上
