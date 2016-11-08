@@ -25,14 +25,9 @@ public enum NotificationCenter {
         allObserver = new ConcurrentHashMap<>();
     }
 
-    /**
-     * add observer by annotation
-     *
-     * @param observer
-     */
-    public void addObserver(final Object observer) {
+    public synchronized void addObserver(final Object observer) {
         allObserver.put(observer, true);
-        for(Class<?> i : observer.getClass().getInterfaces()) {
+        for (Class<?> i : observer.getClass().getInterfaces()) {
             Notification notification = notificationMap.get(i);
             if (notification != null) {
                 notification.getObservers().put(observer, true);
@@ -40,9 +35,9 @@ public enum NotificationCenter {
         }
     }
 
-    public void removeObserver(final Object observer) {
+    public synchronized void removeObserver(final Object observer) {
         allObserver.remove(observer);
-        for(Class<?> i : observer.getClass().getInterfaces()) {
+        for (Class<?> i : observer.getClass().getInterfaces()) {
             Notification notification = notificationMap.get(i);
             if (notification != null) {
                 notification.getObservers().remove(observer);
@@ -50,10 +45,6 @@ public enum NotificationCenter {
         }
     }
 
-    /**
-     * @param callback
-     * @return not null
-     */
     private <T> Notification<T> getNotification(Class<T> callback) {
         Notification notification = notificationMap.get(callback);
         if (notification == null) {
@@ -62,7 +53,7 @@ public enum NotificationCenter {
         return notification;
     }
 
-    private <T> Notification<T> addNotification(Class<T> callback) {
+    private synchronized  <T> Notification<T> addNotification(Class<T> callback) {
         Notification<T> notification = notificationMap.get(callback);
         if (notification == null) {
             notification = new Notification<>(callback, handler);
