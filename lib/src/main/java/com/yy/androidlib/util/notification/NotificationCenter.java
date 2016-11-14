@@ -4,7 +4,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +31,7 @@ public enum NotificationCenter {
 
     public synchronized void addObserver(final Object observer) {
         allObserver.put(observer, true);
-        for (Class<?> i : observer.getClass().getInterfaces()) {
+        for (Class<?> i : getAllInterfaces(observer.getClass())) {
             Notification notification = notificationMap.get(i);
             if (notification != null) {
                 notification.getObservers().put(observer, true);
@@ -37,7 +41,7 @@ public enum NotificationCenter {
 
     public synchronized void removeObserver(final Object observer) {
         allObserver.remove(observer);
-        for (Class<?> i : observer.getClass().getInterfaces()) {
+        for (Class<?> i : getAllInterfaces(observer.getClass())) {
             Notification notification = notificationMap.get(i);
             if (notification != null) {
                 notification.getObservers().remove(observer);
@@ -73,8 +77,28 @@ public enum NotificationCenter {
         return getNotification(callback).getObserver();
     }
 
-    @Deprecated
-    public void addCallbacks(Class callbackParent) {
-        // do nothing
+    public static List<Class<?>> getAllInterfaces(final Class<?> cls) {
+        if (cls == null) {
+            return null;
+        }
+
+        final LinkedHashSet<Class<?>> interfacesFound = new LinkedHashSet<>();
+        getAllInterfaces(cls, interfacesFound);
+
+        return new ArrayList<>(interfacesFound);
+    }
+
+    private static void getAllInterfaces(Class<?> cls, final HashSet<Class<?>> interfacesFound) {
+        while (cls != null) {
+            final Class<?>[] interfaces = cls.getInterfaces();
+
+            for (final Class<?> i : interfaces) {
+                if (interfacesFound.add(i)) {
+                    getAllInterfaces(i, interfacesFound);
+                }
+            }
+
+            cls = cls.getSuperclass();
+        }
     }
 }
