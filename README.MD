@@ -79,5 +79,5 @@ maven
 
 gradle
 ```groovy
-compile 'com.yy:android-push-sdk:${versoion}'
+compile 'com.yy:notification-center-android:${versoion}'
 ```
